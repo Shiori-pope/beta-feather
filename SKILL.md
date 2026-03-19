@@ -1,29 +1,40 @@
-# Replay Min Request Skill
+# 北理贝塔驿站帖子浏览 Skill
 
-## Purpose
+## 目标
 
-Use this skill when you need to quickly reproduce the mini-program `encrypted` parameter and replay the `gettaskbyTypeCursor` API request in Python.
+用于让 agent 通过北理贝塔驿站接口浏览帖子，支持：
 
-## Inputs
+- 列表浏览（分类 + 排序 + 翻页）
+- 单帖详情查看
 
-- `length` (default: `9999999`)
-- `type` (default: `0`)
-- `radioGroup` (default: `radio4 radio40 radio41 radio42 radio43`)
-- `c_time` (auto-generated UTC ISO string if omitted)
+## 入口脚本
 
-## Algorithm
+- replay_min.py
 
-1. Build payload object: `{"verify":"zzyq","c_time":"<ISO time>"}`
-2. JSON stringify with compact separators.
-3. Encrypt with AES-128-ECB and PKCS7 padding.
-4. Convert ciphertext to uppercase hex as `encrypted`.
-5. Submit form POST to `https://www.yqtech.ltd:8802/gettaskbyTypeCursor`.
+## 支持参数
 
-## Script
+- --tab：帖子板块，可选 all/tucao/qingsu/xinyuan/zhihu
+- --sort：排序类型，默认 0
+	- 0: 新发
+	- 1: 新回
+	- 2: 最热
+	- 3: 精选
+- --pages：连续拉取页数
+- --start-cursor：起始游标，默认 9999999
+- --detail-id：指定后走详情接口，忽略列表参数
+- --insecure：关闭 TLS 证书校验
 
-Run `replay_min.py` in this folder.
+## 接口约定
 
-## Dependencies
+1. 列表接口：POST /gettaskbyTypeCursor
+2. 详情接口：GET /gettaskbyId
+3. encrypted 生成：
+	 1. 构造对象 {"verify":"zzyq","c_time":"<ISO时间>"}
+	 2. JSON 紧凑序列化
+	 3. AES-128-ECB + PKCS7
+	 4. 转大写十六进制
 
-- `requests`
-- `pycryptodome`
+## 输出建议
+
+- 列表模式默认输出精简字段：id、时间、板块、标题、作者、互动计数
+- 详情模式输出完整 JSON，便于 agent 深入分析内容
